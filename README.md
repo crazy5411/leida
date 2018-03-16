@@ -1,4 +1,4 @@
-# PUBG-Radar ![Imgur](https://i.imgur.com/wrclp9L.png)
+# PUBG-Radar ![Imgur](https://i.imgur.com/WHUDRjh.png)
 
 #### By engaging with this repository you explicitly agree with the terms of the Unlicense.
 
