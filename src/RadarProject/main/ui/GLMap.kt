@@ -2,6 +2,9 @@
 
 package main.ui
 
+//import main.sniffer.Sniffer.Companion.preDirection
+//import main.sniffer.Sniffer.Companion.preSelfCoords
+//import main.sniffer.Sniffer.Companion.selfCoords
 import com.badlogic.gdx.ApplicationListener
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Buttons.LEFT
@@ -38,19 +41,16 @@ import main.deserializer.channel.ActorChannel.Companion.corpseLocation
 import main.deserializer.channel.ActorChannel.Companion.droppedItemLocation
 import main.deserializer.channel.ActorChannel.Companion.visualActors
 import main.deserializer.channel.ActorChannel.Companion.weapons
-//import main.sniffer.Sniffer.Companion.preDirection
-//import main.sniffer.Sniffer.Companion.preSelfCoords
-//import main.sniffer.Sniffer.Companion.selfCoords
 import main.struct.Actor
 import main.struct.Archetype
 import main.struct.Archetype.*
 import main.struct.NetworkGUID
+import main.struct.VehicleSyncComponent
+import main.struct.cmd.ActorCMD.actorHealth
 import main.struct.cmd.ActorCMD.actorWithPlayerState
 import main.struct.cmd.ActorCMD.playerStateToActor
-import main.struct.cmd.ActorCMD.actorHealth
-import main.struct.Archetype.Plane
-import main.struct.cmd.*
 import main.struct.cmd.GameStateCMD.ElapsedWarningDuration
+import main.struct.cmd.GameStateCMD.IsTeamMatch
 import main.struct.cmd.GameStateCMD.NumAlivePlayers
 import main.struct.cmd.GameStateCMD.NumAliveTeams
 import main.struct.cmd.GameStateCMD.PoisonGasWarningPosition
@@ -63,18 +63,18 @@ import main.struct.cmd.GameStateCMD.TotalWarningDuration
 import main.struct.cmd.PlayerStateCMD.attacks
 import main.struct.cmd.PlayerStateCMD.playerNames
 import main.struct.cmd.PlayerStateCMD.playerNumKills
-import main.struct.cmd.PlayerStateCMD.teamNumbers
 import main.struct.cmd.PlayerStateCMD.selfID
 import main.struct.cmd.PlayerStateCMD.selfStateID
-import main.util.PlayerProfile.Companion.query
-import main.util.tuple2
-import main.util.tuple4
+import main.struct.cmd.PlayerStateCMD.teamNumbers
 import main.struct.cmd.TeamCMD.team
+import main.struct.cmd.selfAttachTo
+import main.struct.cmd.selfCoords
+import main.struct.cmd.selfDirection
+import main.util.tuple4
+import java.text.DecimalFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.pow
-import java.text.DecimalFormat
-import kotlin.math.roundToInt
 
 typealias renderInfo = tuple4<Actor, Float, Float, Float>
 
@@ -183,6 +183,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     private lateinit var littleFontShadow: BitmapFont
 
 
+
     private val tileZooms = listOf("256", "512", "1024", "2048", "4096")
     private val tileRowCounts = listOf(1, 2, 4, 8, 16)
     private val tileSizes = listOf(819200f, 409600f, 204800f, 102400f, 51200f)
@@ -206,10 +207,12 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     private var drawcompass = -1
     private var drawmenu = 1
     private var toggleView = -1
-    private var toggleVehicles = -1
-    private var toggleVNames = -1
+   // private var toggleVehicles = -1
+  //  private var toggleVNames = -1
     private var drawgrid = -1
     private var nameToggles = 4
+    private var VehicleInfoToggles = 1
+    private var ZoomToggles = 1
     ///////////////////////////
     private var scopesToFilter = arrayListOf("")
     private var weaponsToFilter = arrayListOf("")
@@ -223,6 +226,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     private var prevScreenY = -1f
     private var screenOffsetX = 0f
     private var screenOffsetY = 0f
+
 
 
     // Origin Offset
@@ -285,9 +289,43 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
         when (keycode) {
 
+
+        // Change Player Info
+            F1 -> {
+                if (nameToggles < 6) {nameToggles += 1}
+                if (nameToggles == 6) {nameToggles = 1}
+            }
+
+            F5 -> {
+                if (VehicleInfoToggles <= 4) {VehicleInfoToggles += 1}
+                if (VehicleInfoToggles == 4) {VehicleInfoToggles = 1}
+            }
+        // Zoom (Loot, Combat, Scout)
+            NUMPAD_8 -> {
+                if (ZoomToggles <= 4) { ZoomToggles += 1}
+                if (ZoomToggles == 4) { ZoomToggles = 1}
+                // then
+                if (ZoomToggles == 1) {camera.zoom = 1 / 8f}
+                // or
+                if (ZoomToggles == 2) {camera.zoom = 1 / 12f}
+                // or
+                if (ZoomToggles == 3) {camera.zoom = 1 / 24f}
+            }
+        // Other Filter Keybinds
+            F2 -> drawcompass = drawcompass * -1
+            F3 -> drawgrid = drawgrid * -1
+
+        // Toggle View Line
+            F4 -> toggleView = toggleView * -1
+
+        // Toggle Vehicles
+        //  F5 -> toggleVehicles = toggleVehicles * -1
+        //  F6 -> toggleVNames = toggleVNames * -1
+
+        // Toggle Menu
+            F12 -> drawmenu = drawmenu * -1
+
         // Icon Filter Keybinds
-            INSERT -> drawmenu = drawmenu * -1
-            END -> drawgrid = drawgrid * -1
             NUMPAD_1 -> filterWeapon = filterWeapon * -1
             NUMPAD_2 -> filterLvl2 = filterLvl2 * -1
             NUMPAD_3 -> filterHeals = filterHeals * -1
@@ -295,31 +333,11 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
             NUMPAD_5 -> filterAttach = filterAttach * -1
             NUMPAD_6 -> filterScope = filterScope * -1
             NUMPAD_0 -> filterAmmo = filterAmmo * -1
-            HOME -> drawcompass = drawcompass * -1
-            NUMPAD_7 -> camera.zoom = 1 / 8f
-            NUMPAD_8 -> camera.zoom = 1 / 12f
-            NUMPAD_9 -> camera.zoom = 1 / 24f
-
-        // Toggle Transparent Player Icons
-            F7 -> toggleVehicles = toggleVehicles * -1
-            F8 -> toggleVNames = toggleVNames * -1
-            F12 -> {
-                if (nameToggles < 5) {
-                    nameToggles += 1
-                }
-                if (nameToggles == 5) {
-                    nameToggles = 1
-                }
-            }
 
         // Zoom In/Out || Overrides Max/Min Zoom
-            PLUS -> camera.zoom = camera.zoom + 0.00525f
-            MINUS -> camera.zoom = camera.zoom - 0.00525f
-
-        // Toggle View Line
-            F11 -> toggleView = toggleView * -1
-
-
+            MINUS -> camera.zoom = camera.zoom + 0.00525f
+            PLUS -> camera.zoom = camera.zoom - 0.00525f
+            // lol
         }
         return false
     }
@@ -568,23 +586,24 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
             hubFont.draw(spriteBatch, "$NumAlivePlayers", windowWidth - 110f - layout.width / 2, windowHeight - 29f)
             val teamText = "$NumAliveTeams"
 
-            if (teamText != numText) {
+
+            if (IsTeamMatch) {
                 layout.setText(hubFont, teamText)
                 spriteBatch.draw(hubpanel, windowWidth - 260f, windowHeight - 60f)
                 hubFontShadow.draw(spriteBatch, "TEAM", windowWidth - 215f, windowHeight - 29f)
                 hubFont.draw(spriteBatch, "$NumAliveTeams", windowWidth - 240f - layout.width / 2, windowHeight - 29f)
             }
 
-            if (teamText != numText) {
-                val timeText = "${TotalWarningDuration.toInt() - ElapsedWarningDuration.toInt()}"
-                layout.setText(hubFont, timeText)
+            if (IsTeamMatch) {
+
+                layout.setText(hubFont, zero)
                 spriteBatch.draw(hubpanel, windowWidth - 390f, windowHeight - 60f)
-                hubFontShadow.draw(spriteBatch, "SECS", windowWidth - 345f, windowHeight - 29f)
-                hubFont.draw(spriteBatch, "${TotalWarningDuration.toInt() - ElapsedWarningDuration.toInt()}", windowWidth - 370f - layout.width / 2, windowHeight - 29f)
+                hubFontShadow.draw(spriteBatch, "KILLS", windowWidth - 345f, windowHeight - 29f)
+                hubFont.draw(spriteBatch, "$zero", windowWidth - 370f - layout.width / 2, windowHeight - 29f)
             } else {
                 spriteBatch.draw(hubpanel, windowWidth - 390f + 130f, windowHeight - 60f)
-                hubFontShadow.draw(spriteBatch, "SECS", windowWidth - 345f + 128f, windowHeight - 29f)
-                hubFont.draw(spriteBatch, "${TotalWarningDuration.toInt() - ElapsedWarningDuration.toInt()}", windowWidth - 370f + 128f - layout.width / 2, windowHeight - 29f)
+                hubFontShadow.draw(spriteBatch, "KILLS", windowWidth - 345f + 128f, windowHeight - 29f)
+                hubFont.draw(spriteBatch, "$zero", windowWidth - 370f + 128f - layout.width / 2, windowHeight - 29f)
 
             }
 
@@ -631,8 +650,19 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
             else
                 espFontShadow.draw(spriteBatch, "THROW", 200f, windowHeight - 25f)
 
+            if (drawmenu == 1)
+                espFont.draw(spriteBatch, "[INS] Menu ON", 270f, windowHeight - 25f)
+            else
+                espFontShadow.draw(spriteBatch, "[INS] Menu OFF", 270f, windowHeight - 25f)
+
             val num = nameToggles
-            espFontShadow.draw(spriteBatch, "Player Info[11]: $num", 270f, windowHeight - 42f)
+            espFontShadow.draw(spriteBatch, "[F8] Player Info: $num", 270f, windowHeight - 42f)
+
+            val znum = ZoomToggles
+            espFontShadow.draw(spriteBatch, "[Num8] Zoom Toggle: $znum", 40f, windowHeight - 68f)
+
+            val vnum = VehicleInfoToggles
+            espFontShadow.draw(spriteBatch, "[F5] Vehicle Toggles: $vnum", 40f, windowHeight - 85f)
 
 
             val pinDistance = (pinLocation.cpy().sub(selfX, selfY).len() / 100).toInt()
@@ -642,83 +672,97 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
             drawPlayerNames(typeLocation[Player], selfX, selfY)
             //drawMyself(tuple4(null, selfX, selfY, selfDir.angle()))
 
+
             val camnum = camera.zoom
+
             if (drawmenu == 1) {
-                spriteBatch.draw(menu, 40f, windowHeight / 2 - 60f)
+                spriteBatch.draw(menu, 20f, windowHeight / 2 - 200f)
+
+                // Filters
                 if (filterWeapon != 1)
-                    menuFontOn.draw(spriteBatch, "On", 230f, windowHeight / 2 + 122f)
+                    menuFontOn.draw(spriteBatch, "Enabled", 187f, windowHeight / 2 + 103f)
                 else
-                    menuFontOFF.draw(spriteBatch, "Off", 230f, windowHeight / 2 + 122f)
+                    menuFontOFF.draw(spriteBatch, "Disabled", 187f, windowHeight / 2 + 103f)
 
                 if (filterLvl2 != 1)
-                    menuFontOn.draw(spriteBatch, "On", 230f, windowHeight / 2 + 110f)
+                    menuFontOn.draw(spriteBatch, "Enabled", 187f, windowHeight / 2 + 85f)
                 else
-                    menuFontOFF.draw(spriteBatch, "Off", 230f, windowHeight / 2 + 110f)
+                    menuFontOFF.draw(spriteBatch, "Disabled", 187f, windowHeight / 2 + 85f)
 
                 if (filterHeals != 1)
-                    menuFontOn.draw(spriteBatch, "On", 230f, windowHeight / 2 + 97f)
+                    menuFontOn.draw(spriteBatch, "Enabled", 187f, windowHeight / 2 + 67f)
                 else
-                    menuFontOFF.draw(spriteBatch, "Off", 230f, windowHeight / 2 + 97f)
+                    menuFontOFF.draw(spriteBatch, "Disabled", 187f, windowHeight / 2 + 67f)
 
                 if (filterThrow != 1)
-                    menuFontOn.draw(spriteBatch, "On", 230f, windowHeight / 2 + 83f)
+                    menuFontOn.draw(spriteBatch, "Enabled", 187f, windowHeight / 2 + 49f)
                 else
-                    menuFontOFF.draw(spriteBatch, "Off", 230f, windowHeight / 2 + 83f)
+                    menuFontOFF.draw(spriteBatch, "Disabled", 187f, windowHeight / 2 + 49f)
 
                 if (filterAttach != 1)
-                    menuFontOn.draw(spriteBatch, "On", 230f, windowHeight / 2 + 70f)
+                    menuFontOn.draw(spriteBatch, "Enabled", 187f, windowHeight / 2 + 31f)
                 else
-                    menuFontOFF.draw(spriteBatch, "Off", 230f, windowHeight / 2 + 70f)
+                    menuFontOFF.draw(spriteBatch, "Disabled", 187f, windowHeight / 2 + 31f)
 
                 if (filterScope != 1)
-                    menuFontOn.draw(spriteBatch, "On", 230f, windowHeight / 2 + 58f)
+                    menuFontOn.draw(spriteBatch, "Enabled", 187f, windowHeight / 2 + 13f)
                 else
-                    menuFontOFF.draw(spriteBatch, "Off", 230f, windowHeight / 2 + 58f)
+                    menuFontOFF.draw(spriteBatch, "Disabled", 187f, windowHeight / 2 + 13f)
 
                 if (filterAmmo != 1)
-                    menuFontOn.draw(spriteBatch, "On", 230f, windowHeight / 2 + 45f)
+                    menuFontOn.draw(spriteBatch, "Enabled", 187f, windowHeight / 2 + -5f)
                 else
-                    menuFontOFF.draw(spriteBatch, "Off", 230f, windowHeight / 2 + 45f)
+                    menuFontOFF.draw(spriteBatch, "Disabled", 187f, windowHeight / 2 + -5f)
 
+                val camvalue = camera.zoom
+                when {
+                    camvalue <= 0.0100f -> menuFontOFF.draw(spriteBatch, "Max Zoom", 187f, windowHeight / 2 + -27f)
+                    camvalue >= 1f -> menuFontOFF.draw(spriteBatch, "Min Zoom", 187f, windowHeight / 2 + -27f)
+                    camvalue == 0.2500f -> menuFont.draw(spriteBatch, "Default", 187f, windowHeight / 2 + -27f)
+                    camvalue == 0.1250f -> menuFont.draw(spriteBatch, "Scouting", 187f, windowHeight / 2 + -27f)
+                    camvalue >= 0.0833f -> menuFont.draw(spriteBatch, "Combat", 187f, windowHeight / 2 + -27f)
+                    camvalue <= 0.0417f -> menuFont.draw(spriteBatch, "Looting", 187f, windowHeight / 2 + -27f)
+
+                    else -> menuFont.draw(spriteBatch, ("%.4f").format(camnum), 187f, windowHeight / 2 + -27f)
+                }
+
+                // Name Toggles
+                val togs = nameToggles
+                if (nameToggles != 1)
+
+                    menuFontOn.draw(spriteBatch, "Enabled: $togs", 187f, windowHeight / 2 + -89f)
+                else
+                    menuFontOFF.draw(spriteBatch, "Disabled", 187f, windowHeight / 2 + -89f)
+
+
+                // Compass
                 if (drawcompass != 1)
 
-                    menuFontOFF.draw(spriteBatch, "Off", 230f, windowHeight / 2 + 32f)
+                    menuFontOFF.draw(spriteBatch, "Disabled", 187f, windowHeight / 2 + -107f)
                 else
-                    menuFontOn.draw(spriteBatch, "On", 230f, windowHeight / 2 + 32f)
+                    menuFontOn.draw(spriteBatch, "Enabled", 187f, windowHeight / 2 + -107f)
 
-                if (toggleVehicles != 1)
-                    menuFontOn.draw(spriteBatch, "On", 230f, windowHeight / 2 + 17f)
-                else
-                    menuFontOFF.draw(spriteBatch, "Off", 230f, windowHeight / 2 + 17f)
-
-                if (toggleVNames != 1)
-                    menuFontOn.draw(spriteBatch, "On", 230f, windowHeight / 2 + 6f)
-                else
-                    menuFontOFF.draw(spriteBatch, "Off", 230f, windowHeight / 2 + 6f)
-
-                if (toggleView == 1)
-                    menuFontOn.draw(spriteBatch, "On", 230f, windowHeight / 2 - 8f)
-                else
-                    menuFontOFF.draw(spriteBatch, "Off", 230f, windowHeight / 2 - 8f)
-
+                // Grid
                 if (drawgrid == 1)
 
-                    menuFontOn.draw(spriteBatch, "On", 230f, windowHeight / 2 - 20f)
+                    menuFontOn.draw(spriteBatch, "Enabled", 187f, windowHeight / 2 + -125f)
                 else
-                    menuFontOFF.draw(spriteBatch, "Off", 230f, windowHeight / 2 - 20f)
+                    menuFontOFF.draw(spriteBatch, "Disabled", 187f, windowHeight / 2 + -125f)
 
-                if (camera.zoom == 0.0100f)
-                    menuFontOFF.draw(spriteBatch, "Max Zoom", 230f, windowHeight / 2 - 33f)
+                if (toggleView == 1)
+                    menuFontOn.draw(spriteBatch, "Enabled", 187f, windowHeight / 2 + -143f)
                 else
-                    menuFont.draw(spriteBatch, ("%.4f").format(camnum), 230f, windowHeight / 2 - 34f)
+                    menuFontOFF.draw(spriteBatch, "Disabled", 187f, windowHeight / 2 + -143f)
 
+                if (VehicleInfoToggles < 3)
+                    menuFontOn.draw(spriteBatch, "Enabled", 187f, windowHeight / 2 + -161f)
+                if (VehicleInfoToggles == 3)
+                    menuFontOFF.draw(spriteBatch, "Disabled", 187f, windowHeight / 2 + -161f)
 
-                if (camera.zoom == 1f)
-                    menuFontOFF.draw(spriteBatch, "Min Zoom", 230f, windowHeight / 2 - 46f)
-                else
-                    menuFont.draw(spriteBatch, ("%.4f").format(camnum), 230f, windowHeight / 2 - 47f)
+                // DrawMenu == 1 already
+                menuFontOn.draw(spriteBatch, "Enabled", 187f, windowHeight / 2 + -179f)
             }
-
+            // DrawMenu == 0 (Disabled)
 
 
             if (drawcompass == 1) {
@@ -988,12 +1032,12 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
             when (type) {
                 TwoSeatBoat -> actorInfos?.forEach {
 
-                    if (toggleVehicles != 1) {
+                    if (VehicleInfoToggles < 3) {
 
                         val (actor, x, y, dir) = it
                         val (sx, sy) = Vector2(x, y).mapToWindow()
 
-                        if (toggleVNames != 1) compaseFont.draw(spriteBatch, "JSKI", sx + 15, windowHeight - sy - 2)
+                        if (VehicleInfoToggles == 2) compaseFont.draw(spriteBatch, "JSKI", sx + 15, windowHeight - sy - 2)
 
                         spriteBatch.draw(
                                 jetski,
@@ -1014,11 +1058,11 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                     }
                 }
                 SixSeatBoat -> actorInfos?.forEach {
-                    if (toggleVehicles != 1) {
+                    if (VehicleInfoToggles < 3) {
                         val (actor, x, y, dir) = it
                         val (sx, sy) = Vector2(x, y).mapToWindow()
 
-                        if (toggleVNames != 1) compaseFont.draw(spriteBatch, "BOAT", sx + 15, windowHeight - sy - 2)
+                        if (VehicleInfoToggles == 2) compaseFont.draw(spriteBatch, "BOAT", sx + 15, windowHeight - sy - 2)
 
                         spriteBatch.draw(
                                 boat,
@@ -1039,12 +1083,12 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                     }
                 }
                 TwoSeatBike -> actorInfos?.forEach {
-                    if (toggleVehicles != 1) {
+                    if (VehicleInfoToggles < 3) {
                         val (actor, x, y, dir) = it
                         val (sx, sy) = Vector2(x, y).mapToWindow()
 
 
-                        if (toggleVNames != 1) compaseFont.draw(spriteBatch, "BIKE", sx + 15, windowHeight - sy - 2)
+                        if (VehicleInfoToggles == 2)compaseFont.draw(spriteBatch, "BIKE", sx + 15, windowHeight - sy - 2)
 
                         spriteBatch.draw(
                                 bike,
@@ -1065,11 +1109,11 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                     }
                 }
                 TwoSeatCar -> actorInfos?.forEach {
-                    if (toggleVehicles != 1) {
+                    if (VehicleInfoToggles < 3) {
                         val (actor, x, y, dir) = it
                         val (sx, sy) = Vector2(x, y).mapToWindow()
 
-                        if (toggleVNames != 1) compaseFont.draw(spriteBatch, "BUGGY", sx + 15, windowHeight - sy - 2)
+                        if (VehicleInfoToggles == 2) compaseFont.draw(spriteBatch, "BUGGY", sx + 15, windowHeight - sy - 2)
 
                         spriteBatch.draw(
                                 buggy,
@@ -1094,11 +1138,11 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                     }
                 }
                 ThreeSeatCar -> actorInfos?.forEach {
-                    if (toggleVehicles != 1) {
+                    if (VehicleInfoToggles < 3) {
                         val (actor, x, y, dir) = it
                         val (sx, sy) = Vector2(x, y).mapToWindow()
 
-                        if (toggleVNames != 1) compaseFont.draw(spriteBatch, "BIKE", sx + 15, windowHeight - sy - 2)
+                        if (VehicleInfoToggles == 2) compaseFont.draw(spriteBatch, "BIKE", sx + 15, windowHeight - sy - 2)
 
                         spriteBatch.draw(
                                 bike3x,
@@ -1120,11 +1164,11 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
                 }
                 FourSeatDU -> actorInfos?.forEach {
-                    if (toggleVehicles != 1) {
+                    if (VehicleInfoToggles < 3) {
                         val (actor, x, y, dir) = it
                         val (sx, sy) = Vector2(x, y).mapToWindow()
 
-                        if (toggleVNames != 1) compaseFont.draw(spriteBatch, "CAR", sx + 15, windowHeight - sy - 2)
+                        if (VehicleInfoToggles == 2) compaseFont.draw(spriteBatch, "CAR", sx + 15, windowHeight - sy - 2)
 
                         spriteBatch.draw(
                                 vehicle,
@@ -1151,11 +1195,11 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
                 }
                 FourSeatP -> actorInfos?.forEach {
-                    if (toggleVehicles != 1) {
+                    if (VehicleInfoToggles < 3) {
                         val (actor, x, y, dir) = it
                         val (sx, sy) = Vector2(x, y).mapToWindow()
 
-                        if (toggleVNames != 1) compaseFont.draw(spriteBatch, "PICKUP", sx + 15, windowHeight - sy - 2)
+                        if (VehicleInfoToggles == 2)compaseFont.draw(spriteBatch, "PICKUP", sx + 15, windowHeight - sy - 2)
 
                         spriteBatch.draw(
                                 pickup,
@@ -1181,11 +1225,11 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                     }
                 }
                 SixSeatCar -> actorInfos?.forEach {
-                    if (toggleVehicles != 1) {
+                    if (VehicleInfoToggles < 3) {
                         val (actor, x, y, dir) = it
                         val (sx, sy) = Vector2(x, y).mapToWindow()
 
-                        if (toggleVNames != 1) compaseFont.draw(spriteBatch, "VAN", sx + 15, windowHeight - sy - 2)
+                        if (VehicleInfoToggles == 2) compaseFont.draw(spriteBatch, "VAN", sx + 15, windowHeight - sy - 2)
 
                         spriteBatch.draw(
                                 van,
