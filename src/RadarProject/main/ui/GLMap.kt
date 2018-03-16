@@ -133,7 +133,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     private lateinit var DaMap: Texture
     private lateinit var iconImages: Icons
     private lateinit var corpseboximage: Texture
-    private lateinit var airdropimage: Texture
+    private lateinit var AirDropAllTheColors: Texture
     private lateinit var bgcompass: Texture
     private lateinit var menu: Texture
     private lateinit var largeFont: BitmapFont
@@ -375,7 +375,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         menu = Texture(Gdx.files.internal("images/menu.png"))
         hubpanelblank = Texture(Gdx.files.internal("images/hub_panel_blank_long.png"))
         corpseboximage = Texture(Gdx.files.internal("icons/box.png"))
-        airdropimage = Texture(Gdx.files.internal("icons/airdrop.png"))
+        AirDropAllTheColors = Texture(Gdx.files.internal("icons/AirDropAllTheColors.png"))
         vehicle = Texture(Gdx.files.internal("images/vehicle.png"))
         vehicleo = Texture(Gdx.files.internal("images/vehicleo.png"))
         arrow = Texture(Gdx.files.internal("images/arrow.png"))
@@ -847,7 +847,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                 val (sx, sy) = Vector2(x, y).mapToWindow()
                 val syFix = windowHeight - sy
                 val iconScale = 1f / camera.zoom
-                spriteBatch.draw(airdropimage, sx - iconScale / 2, syFix + iconScale / 2, iconScale, -iconScale,
+                spriteBatch.draw(AirDropAllTheColors, sx - iconScale / 2, syFix + iconScale / 2, iconScale, -iconScale,
                         0, 0, 64, 64,
                         false, true)
             }
@@ -1513,7 +1513,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         hpgreen.dispose()
         hpred.dispose()
         corpseboximage.dispose()
-        airdropimage.dispose()
+        AirDropAllTheColors.dispose()
         vehicle.dispose()
         iconImages.iconSheet.dispose()
         compaseFont.dispose()
