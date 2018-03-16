@@ -155,7 +155,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     private lateinit var vehicle: Texture
     private lateinit var boato: Texture
 
-    private lateinit var buggyo: Texture
+
     private lateinit var vano: Texture
     private lateinit var vehicleo: Texture
     private lateinit var jetskio: Texture
@@ -167,8 +167,8 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     private lateinit var Bike3RED: Texture
     private lateinit var pickupBLUE: Texture
     private lateinit var pickupRED: Texture
-
-    private lateinit var buggy: Texture
+    private lateinit var BuggyBLUE: Texture
+    private lateinit var BuggyRED: Texture
     private lateinit var van: Texture
     private lateinit var arrow: Texture
     private lateinit var arrowsight: Texture
@@ -385,20 +385,21 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
         arrowsight = Texture(Gdx.files.internal("images/red_view_line.png"))
         parachute = Texture(Gdx.files.internal("images/parachute.png"))
         boat = Texture(Gdx.files.internal("images/boat.png"))
+        boato = Texture(Gdx.files.internal("images/boato.png"))
         BikeBLUE = Texture(Gdx.files.internal("images/BikeBLUE.png"))
         BikeRED = Texture(Gdx.files.internal("images/BikeRED.png"))
         Bike3BLUE = Texture(Gdx.files.internal("images/Bike3BLUE.png"))
         Bike3RED = Texture(Gdx.files.internal("images/Bike3RED.png"))
         pickupBLUE = Texture(Gdx.files.internal("images/pickupBLUE.png"))
         pickupRED = Texture(Gdx.files.internal("images/pickupRED.png"))
-        van = Texture(Gdx.files.internal("images/van.png"))
-        buggy = Texture(Gdx.files.internal("images/buggy.png"))
-        boato = Texture(Gdx.files.internal("images/boato.png"))
+        BuggyBLUE = Texture(Gdx.files.internal("images/BuggyBLUE.png"))
+        BuggyRED = Texture(Gdx.files.internal("images/BuggyRED.png"))
+
         jetski = Texture(Gdx.files.internal("images/jetski.png"))
         jetskio = Texture(Gdx.files.internal("images/jetskio.png"))
-
+        van = Texture(Gdx.files.internal("images/van.png"))
         vano = Texture(Gdx.files.internal("images/vano.png"))
-        buggyo = Texture(Gdx.files.internal("images/buggyo.png"))
+
         grenade = Texture(Gdx.files.internal("images/grenade.png"))
         iconImages = Icons(Texture(Gdx.files.internal("images/item-sprites.png")), 64)
         var cur = 0
@@ -1081,7 +1082,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                         if (VehicleInfoToggles == 2) compaseFont.draw(spriteBatch, "BUGGY", sx + 15, windowHeight - sy - 2)
 
                         spriteBatch.draw(
-                                buggy,
+                                BuggyBLUE,
                                 sx + 2, windowHeight - sy - 2,
                                 2.toFloat() / 2, 2.toFloat() / 2,
                                 2.toFloat(), 2.toFloat(),
@@ -1092,7 +1093,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                         val v_y = actor.velocity.y
                         if (actor.attachChildren.isNotEmpty() || v_x * v_x + v_y * v_y > 40) {
                             spriteBatch.draw(
-                                    buggyo,
+                                    BuggyRED,
                                     sx + 2, windowHeight - sy - 2,
                                     2.toFloat() / 2, 2.toFloat() / 2,
                                     2.toFloat(), 2.toFloat(),
