@@ -45,7 +45,6 @@ import main.struct.Actor
 import main.struct.Archetype
 import main.struct.Archetype.*
 import main.struct.NetworkGUID
-import main.struct.VehicleSyncComponent
 import main.struct.cmd.ActorCMD.actorHealth
 import main.struct.cmd.ActorCMD.actorWithPlayerState
 import main.struct.cmd.ActorCMD.playerStateToActor
