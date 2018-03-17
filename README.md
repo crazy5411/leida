@@ -1,5 +1,8 @@
 # PUBG-Radar ![Imgur](https://i.imgur.com/WHUDRjh.png)
 
+
+This is reproduced！
+
 #### By engaging with this repository you explicitly agree with the terms of the Unlicense.
 
 ### Updated for Newest Patch
