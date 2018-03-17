@@ -12,38 +12,38 @@ SDK Dumped by (legitnutty33) Thank You!
 
 
 ### Key Kinds
-You can't filter level 3 gear (always enabled)
+3级装备无法关闭始终显示
 
 #### Item Filter:
-* NUMPAD_1 -> Filter Weapon
-* NUMPAD_2 -> Filter Equip
-* NUMPAD_3 -> Filter Meds
-* NUMPAD_4 -> Filter Throw
-* NUMPAD_5 -> Filter Attach
-* NUMPAD_6 -> Filter Scope
-* NUMPAD_0 -> Filter Ammo
+* NUMPAD_1 -> 显示武器
+* NUMPAD_2 -> 显示装备
+* NUMPAD_3 -> 显示药物
+* NUMPAD_4 -> 显示投掷物品
+* NUMPAD_5 -> 显示配件
+* NUMPAD_6 -> 显示瞄具
+* NUMPAD_0 -> 过滤弹药
 
 #### Zooms:
-* NUMPAD_8 -> Looting - Combat -Scouting
-* NUMPAD_PLUS ->  Camera Zoom ++
-* NUMPAD_MINUS -> Camera Zoom --
+* NUMPAD_8 -> Looting小视距搜刮 - Combat中视距战斗 -Scouting大视距侦查
+* NUMPAD_PLUS ->  Camera Zoom ++相机距离
+* NUMPAD_MINUS -> Camera Zoom --相机距离
 
 #### Other
-* F1 -> Change Player Info (Name, Distance, HP, Weapon)
-* F2 -> Toggle Compass
-* F3 -> Toggle Grind (100m)
-* F4 -> Toggle View Line
-* F5 -> Toggle Vehicles (icon, name or both)
-* F12 -> Toggle View Line
+* F1 -> 更改玩家信息（名称，距离，HP，武器）
+* F2 -> 切换指南针
+* F3 -> 指示线 (100m)
+* F4 -> 切换视图线
+* F5 -> 切换车辆（图标，名称或两者都有）
+* F12 -> 切换视图线
 
 
-## How to: Build, Install and RUN PUBG Radar
+## 如何：构建，安装和运行PUBG雷达
 https://youtu.be/H_gud8xuP-s
 
-### Online Mode:
+### 在线模式:
 `java -jar target\pubg-radar-1.0-SNAPSHOT-jar-with-dependencies.jar "Middle PC IP" PortFilter "Game PC IP"`
 
-### Offline Mode:
+### 离线模式:
 You can replay a PCAP file in offline mode:
 
 `java -jar target\pubg-radar-1.0-SNAPSHOT-jar-with-dependencies.jar "Middle PC IP" PortFilter "Game PC IP" Offline`
@@ -51,25 +51,24 @@ You can replay a PCAP file in offline mode:
 
 ## Build
 
-1. Install [Maven](https://maven.apache.org/install.html)
-2. Add Maven to your environment PATH, screenshot below.
-3. Add MAVEN_OPTS environment variable, screenshot below.
-4. Install [JDK8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
-5. Add JAVA_HOME to your Environment Path, screenshot below.
-6. Use the command prompt to go to your VMRadar directory (with the src folder)
-7. type `mvn verify install` into the command prompt.
-
-#### You can find detailed instructions on how to run a maven project [here](https://maven.apache.org/run.html)
+1. 安装Maven
+2.将Maven添加到您的环境路径，下面截图。
+3.添加MAVEN_OPTS环境变量，截图如下。
+4.安装JDK8
+5.将JAVA_HOME添加到您的环境路径中，屏幕截图如下。
+6.使用命令提示符转到您的VMRadar目录（使用src文件夹）
+7.输入mvn verify install命令提示符。
+#### 你可以找到关于如何运行Maven项目的详细说明 [here](https://maven.apache.org/run.html)
 
 [IntelliJ IDEA](https://www.jetbrains.com/idea/?fromMenu)
 
 #### MAVEN_OPTS
 ![Imgur](https://i.imgur.com/aWCdgUX.png)
 
-#### Path (Java and Maven)
+#### Path (Java and Maven)（可以百度配置java方法）
 ![Imgur](https://i.imgur.com/hSCYrCM.png)
 
-#### JAVA_HOME
+#### JAVA_HOME（可以百度配置java方法）
 ![Imgur](https://i.imgur.com/4zT1YNR.png)
 
 ## Install
