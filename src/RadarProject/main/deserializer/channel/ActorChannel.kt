@@ -11,7 +11,7 @@ import main.struct.*
 import main.struct.Archetype.*
 import main.struct.NetGUIDCache.Companion.guidCache
 import main.struct.cmd.PlayerStateCMD.selfID
-import main.util.tuple2
+import main.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class ActorChannel(ChIndex: Int, client: Boolean = true): Channel(ChIndex, CHTYPE_ACTOR, client) {
@@ -25,11 +25,12 @@ class ActorChannel(ChIndex: Int, client: Boolean = true): Channel(ChIndex, CHTYP
         val airDropLocation = ConcurrentHashMap<NetworkGUID, Vector3>()
         val droppedItemLocation = ConcurrentHashMap<NetworkGUID, tuple2<Vector2, String>>()
         val droppedItemToItem = ConcurrentHashMap<NetworkGUID, NetworkGUID>()
-        val droppedItemGroup = ConcurrentHashMap<NetworkGUID, ArrayList<NetworkGUID>>()
+        val droppedItemGroup = ConcurrentHashMap<NetworkGUID, DynamicArray<NetworkGUID?>>()
         val droppedItemCompToItem = ConcurrentHashMap<NetworkGUID, NetworkGUID>()
+        val crateitems=ConcurrentHashMap<NetworkGUID,DynamicArray<NetworkGUID?>>()
         val corpseLocation = ConcurrentHashMap<NetworkGUID, Vector3>()
-        val actorHasWeapons=ConcurrentHashMap<NetworkGUID,IntArray>()
-        val weapons = ConcurrentHashMap<Int, Actor>()
+        val actorHasWeapons = ConcurrentHashMap<NetworkGUID, DynamicArray<NetworkGUID?>>()
+        val weapons = ConcurrentHashMap<NetworkGUID, Actor>()
 
         override fun onGameOver() {
             actors.clear()
@@ -39,6 +40,7 @@ class ActorChannel(ChIndex: Int, client: Boolean = true): Channel(ChIndex, CHTYP
             droppedItemGroup.clear()
             droppedItemCompToItem.clear()
             droppedItemToItem.clear()
+            crateitems.clear()
             corpseLocation.clear()
             weapons.clear()
             actorHasWeapons.clear()
@@ -185,7 +187,7 @@ class ActorChannel(ChIndex: Int, client: Boolean = true): Channel(ChIndex, CHTYP
                     if (client) {
                         actors[netGUID] = this
                         when (Type) {
-                            Weapon -> weapons[netGUID.value] = this
+                            Weapon -> weapons[netGUID] = this
                             AirDrop -> airDropLocation[netGUID] = location
                             DeathDropItemPackage -> corpseLocation[netGUID] = location
                             else -> {

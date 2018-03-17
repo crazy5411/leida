@@ -2,9 +2,7 @@
 
 package main.ui
 
-//import main.sniffer.Sniffer.Companion.preDirection
-//import main.sniffer.Sniffer.Companion.preSelfCoords
-//import main.sniffer.Sniffer.Companion.selfCoords
+
 import com.badlogic.gdx.graphics.Color.*
 import com.badlogic.gdx.graphics.GL20.GL_TEXTURE_2D
 import com.badlogic.gdx.graphics.Texture.TextureFilter.*
@@ -206,7 +204,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     private var toggleView = -1
    // private var toggleVehicles = -1
   //  private var toggleVNames = -1
-   // private var drawgrid = -1
+    private var drawgrid = -1
     private var nameToggles = 4
     private var VehicleInfoToggles = 1
     private var ZoomToggles = 1
@@ -305,7 +303,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
             }
         // Other Filter Keybinds
             F2 -> drawcompass = drawcompass * -1
-          //  F3 -> drawgrid = drawgrid * -1
+            F3 -> drawgrid = drawgrid * -1
 
         // Toggle View Line
             F4 -> toggleView = toggleView * -1
@@ -709,7 +707,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
                     menuFontOn.draw(spriteBatch, "Enabled", 187f, windowHeight / 2 + -107f)
 
                 // Grid
-//                if (drawgrid == 1)
+                if (drawgrid == 1)
 
                     menuFontOn.draw(spriteBatch, "Enabled", 187f, windowHeight / 2 + -125f)
 //                else
@@ -757,10 +755,10 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
         }
 
-//        if (drawgrid == 1) {
-//            drawGrid()
-//
-//        }
+        if (drawgrid == 1) {
+            drawGrid()
+
+        }
 
 
         // This makes the array empty if the filter is off for performance with an inverted function since arrays are expensive
@@ -1356,7 +1354,7 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
 
                     if (equippedWeapons != null) {
                         for (w in equippedWeapons) {
-                            val a = weapons[w] ?: continue
+                            val a = weapons[w ?: continue] ?: continue
                             val result = a.archetype.pathName.split("_")
                             weapon += "|" + result[2].substring(4) + "\n"
                         }
@@ -1411,25 +1409,25 @@ class GLMap : InputAdapter(), ApplicationListener, GameListener {
     }
 
 
-//    private fun drawGrid() {
-//        draw(Filled) {
-//            val unit = gridWidth / 8
-//            val unit2 = unit / 10
-//            color = BLACK
-//            //thin grid
-//            for (i in 0..7)
-//                for (j in 0..9) {
-//                    rectLine(0f, i * unit + j * unit2, gridWidth, i * unit + j * unit2, 100f)
-//                    rectLine(i * unit + j * unit2, 0f, i * unit + j * unit2, gridWidth, 100f)
-//                }
-//            color = GRAY
-//            //thick grid
-//            for (i in 0..7) {
-//                rectLine(0f, i * unit, gridWidth, i * unit, 500f)
-//                rectLine(i * unit, 0f, i * unit, gridWidth, 500f)
-//            }
-//        }
-//    }
+    private fun drawGrid() {
+        draw(Filled) {
+            val unit = gridWidth / 8
+            val unit2 = unit / 10
+            color = BLACK
+            //thin grid
+            for (i in 0..7)
+                for (j in 0..9) {
+                    rectLine(0f, i * unit + j * unit2, gridWidth, i * unit + j * unit2, 100f)
+                   rectLine(i * unit + j * unit2, 0f, i * unit + j * unit2, gridWidth, 100f)
+                }
+            color = GRAY
+            //thick grid
+           for (i in 0..7) {
+               rectLine(0f, i * unit, gridWidth, i * unit, 500f)
+                rectLine(i * unit, 0f, i * unit, gridWidth, 500f)
+            }
+        }
+    }
 
 
     private var lastPlayTime = System.currentTimeMillis()
